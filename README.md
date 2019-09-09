@@ -36,28 +36,7 @@
                     　　3. 跨平台，支持Windows(Win7, Win10) Linux(Ubuntu 16.04+)<br>
                     　　4. 不依赖GUI，基于命令行/终端</strong><br>
                     </p>
-                    <h3>三 项目实现</h3>
-                    <p>先实现有平台依赖的库：声明本项目需要的基本控制函数，然后在各个平台独立实现它们；<br>
-                    　　终端控制：实现基本的终端控制函数，例如移动光标，颜色显示，按键获取等(console.h)；<br>
-                    　　　　Windows下，封装Windows Console API(windows/console.c)；<br>
-                    　　　　Linux下，通过输出终端控制码实现移动光标和合颜色显示，调用终端控制函数实现按键获取(linux/console.c)。<br>
-                    　　音乐播放：实现基本的音乐播放操作，如播放，暂停，获取播放时长等函数(music.h)。<br>
-                    　　　　Windows下，封装Windows媒体播放API(windows/music.c)；<br>
-                    　　　　Linux下，(linux/music.c)；<br>
-                    　　网络功能：本程序是通过访问基于http的网络音乐API实现音乐的搜索和下载，所以需要实现HTTP客户端(httpclient.h)；<br>
-                    　　　　Windows下，通过Windows Socket API实现HTTP客户端(windows/httpclient.c)；<br>
-                    　　　　Linux下，通过socket系统库实现HTTP客户端(linux/httpclient.c)。<br>
-                    　　实现和系统有关的其他操作：例如获取目录的所有内容，路径处理等。(system.h) (windows/system.c linux/system.c)。<br>
-                    平台无关的内容：<br>
-                    　　进一步封装的字符串操作(mystring.h mystring.c)。<br>
-                    　　根据已实现的终端控制函数进一步实现对音乐播放器界面的基本操作函数(myler_ui.h myler_ui.c)。<br>
-                    　　根据标准的lrc语法，编写lrc解析器，用于解析歌词，显示当前及其附近的歌词(myler_lyrics.h myler_lyrics.c)。<br>
-                    　　歌单操作，新建/添加/删除/播放控制等的实现（基于双向链表）(myler_list.h myler_list.c)。<br>
-                    　　解析命令行参数，通过命令行参数控制播放器行为(myler_cmdline.h myler_cmdlie.c)。<br>
-                    　　音乐搜索实现，访问相应网址，解析并处理服务器应答，获取搜索结果(myler_search.h myler_search.c)。<br>　　
-                    最后，通过调用上面这些库，实现音乐播放器的所有功能(myler.h myler.cmain.c)。
-                    </p>
-                    <h3>四 项目编译</h3>
+                    <h3>三 项目编译</h3>
                     <p>1. Linux下：<br>
                     　　进入终端，在源码顶层目录下执行: make linux<br>
                     　　(系统里需要有GNU工具链，至少包含gcc和make))<br>
@@ -68,6 +47,6 @@
                     　　(系统里需要有gcc，且在PATH目录下)<br>
                     　　方案三：用C/C++ IDE（如VC6.0 VS2017 dev-c++ codeblocks等）创建一个C工程，将顶层目录和windows目录的的所有C文件和头文件添加到工程中，将顶层目录添加到include路径中，然后编译。
                     </p>
-                    <h3>五 项目展示</h3>
+                    <h3>更多信息</h3>
                     <p>参见<a href="http://39.108.3.243/myler/index.html">http://39.108.3.243/myler/index.html</a></p>
 
