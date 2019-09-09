@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <Windows.h>
+
+#ifdef _MSC_VER
+#pragma comment(lib, "winmm.lib")
+#endif 
 
 static int  _music_id;
 static char _music_cmd[256];
@@ -28,18 +33,31 @@ static char *get_file_name(char *path)
 /* 对mciSendString的一个简易封装
  * - 私有函数
  */
-static int Music_SendString(const char *cmd, const char *device, const char *arg)
+static int send_music_cmd_string(const char *cmd, const char *device, const char *arg)
 {
+    MCIERROR error;
 
+    sprintf(_music_cmd, "%s %s %s", cmd, device, arg);
+    if ((error = mciSendString(_music_cmd, _music_retbuf, sizeof _music_retbuf, NULL))) {
+        mciGetErrorString(error, _music_err, sizeof _music_err);
+        return MUSIC_ERROR;
+    }
+    strcpy(_music_err, "OK");
     return MUSIC_OK;
 }
 
 /* 控制mciSendString
  * - 私有函数
  */
-static int Music_Control(music_t *music, const char *cmd, const char *arg)
+static int music_control(music_t *music, const char *cmd, const char *arg)
 {
-
+    if (music == NULL) {
+        strcpy(_music_err, "NULL Music object");
+        return MUSIC_ERROR;
+    }
+    
+    if (send_music_cmd_string(cmd, music->device, arg))
+        return MUSIC_ERROR;
     return MUSIC_OK;
 }
 
@@ -52,7 +70,14 @@ music_t *music_create(const char *file_name)
     music_t *music = (music_t *)malloc(sizeof(struct _music_t));
 
     if (music) {   
-
+        strcpy(music->file_name, file_name);
+        get_file_name(music->file_name);
+        sprintf(music->device, "_M_-%d-_17_", _music_id++);
+        sprintf(_music_argbuf, "\"%s\" alias %s", file_name, music->device);
+        if (send_music_cmd_string("open", "", _music_argbuf)) {
+            free(music);
+            music = NULL;
+        }
     }
     return music;
 }
@@ -73,7 +98,7 @@ int music_play(music_t *music, mlen_t start, mlen_t end, int repeat)
     end ? sprintf(buf, "to %ld ", end) : sprintf(buf, " ");
     strcat(_music_argbuf, buf);
     repeat ? strcat(_music_argbuf, "repeat") : 0;
-    return Music_Control(music, "play", _music_argbuf);
+    return music_control(music, "play", _music_argbuf);
 }
 
 /* 删除（释放）Music指针
@@ -82,7 +107,7 @@ int music_play(music_t *music, mlen_t start, mlen_t end, int repeat)
 void music_free(music_t *music)
 {
     if (music)
-        Music_Control(music, "close", "");
+        music_control(music, "close", "");
     free(music);
 }
 
@@ -92,7 +117,7 @@ void music_free(music_t *music)
  */
 int music_pause(music_t *music)
 {
-    return Music_Control(music, "pause", "");
+    return music_control(music, "pause", "");
 }
 
 /* 继续播放音乐
@@ -101,7 +126,7 @@ int music_pause(music_t *music)
  */
 int music_resume(music_t *music)
 {
-    return Music_Control(music, "resume", "");
+    return music_control(music, "resume", "");
 }
 
 /* 停止播放音乐
@@ -110,7 +135,7 @@ int music_resume(music_t *music)
  */
 int music_stop(music_t *music)
 {
-    return Music_Control(music, "stop", "");
+    return music_control(music, "stop", "");
 }
 
 /* 获取音乐时长（毫秒）
@@ -120,7 +145,7 @@ int music_stop(music_t *music)
 mlen_t music_get_length(music_t *music)
 {
     mlen_t len;
-    if (Music_Control(music, "status", "length"))
+    if (music_control(music, "status", "length"))
         return 0;
     sscanf(_music_retbuf, "%ld", &len);
     return len;
@@ -133,7 +158,7 @@ mlen_t music_get_length(music_t *music)
 mlen_t music_get_current_length(music_t *music)
 {
     mlen_t len;
-    if (Music_Control(music, "status", "position"))
+    if (music_control(music, "status", "position"))
         return 0;
     sscanf(_music_retbuf, "%ld", &len);
     return len;
@@ -146,7 +171,7 @@ mlen_t music_get_current_length(music_t *music)
 int music_set_volume(music_t *music, int volume)
 {
     sprintf(_music_argbuf, "volume to %d", volume);
-    return Music_Control(music, "setaudio", _music_argbuf);
+    return music_control(music, "setaudio", _music_argbuf);
 }
 
 /* 获取音量
@@ -156,7 +181,7 @@ int music_set_volume(music_t *music, int volume)
 int music_get_volume(music_t *music)
 {
     int volume;
-    if (Music_Control(music, "status", "volume"))
+    if (music_control(music, "status", "volume"))
         return MUSIC_ERROR;
     sscanf(_music_retbuf, "%d", &volume);
     return volume;
@@ -164,7 +189,7 @@ int music_get_volume(music_t *music)
 
  int music_get_status(music_t *music)
  {
-     if (Music_Control(music, "status", "mode"))
+     if (music_control(music, "status", "mode"))
          return MUSIC_ERROR;
      if (strstr(_music_retbuf, "not ready"))
          return MUSIC_NOT_READY;
