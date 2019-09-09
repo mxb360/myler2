@@ -1,0 +1,7 @@
+*.vscode/
+*LocalMusic/
+*DownloadMusic/
+*windows/*.o
+*.exe
+*myler
+*.o
