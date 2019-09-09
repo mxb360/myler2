@@ -1,18 +1,13 @@
 #include "httpclient.h"
 
-#if defined(_WIN32)
-  #include <winsock2.h>
-  #include <Ws2tcpip.h>
+#include <winsock2.h>
+#include <Ws2tcpip.h>
 
-  int inet_pton(int family, const char *strptr, void *addrptr);
-  const char *inet_ntop(int family, const void *addrptr, char *strptr, size_t len);  
+int inet_pton(int family, const char *strptr, void *addrptr);
+const char *inet_ntop(int family, const void *addrptr, char *strptr, size_t len);  
 
-  WSADATA wsaData;
-  typedef SOCKET socket_t;
-#elif defined(Linux)
-  #include <sys/socket.h>
-  typedef int socket_t;
-#endif
+WSADATA wsaData;
+typedef SOCKET socket_t;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,27 +29,18 @@ static int set_error(const char *errstr)
 {
     int err_code, len;
 
-#if defined(_WIN32)
     err_code = WSAGetLastError();
     sprintf(str_err_buf, "%s: ", errstr);
     len = strlen(str_err_buf);
     FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM,
                     NULL, err_code, 0, str_err_buf + len, (sizeof str_err_buf) - len, NULL);
-#elif defined(Linux) || defined(_CYGWIN)
-    err_code = errno;
-    sprintf(str_err_buf, "%s: ", errstr);
-    len = strlen(str_err_buf);
-    strcpy(str_err_buf + len, strerror(errno));
-#endif
     return err_code;
 }
 
 int http_client_init(void)
 {
-#ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &wsaData)) 
         return set_error("WindowsWSAStartupError");
-#endif 
     return 0;
 }
 
