@@ -48,5 +48,5 @@
                     　　方案三：用C/C++ IDE（如VC6.0 VS2017 dev-c++ codeblocks等）创建一个C工程，将顶层目录和windows目录的的所有C文件和头文件添加到工程中，将顶层目录添加到include路径中，然后编译。
                     </p>
                     <h3>更多信息</h3>
-                    <p>　　参见：<a href="http://39.108.3.243/myler/index.html">http://39.108.3.243/myler/index.html</a></p>
+                    <p>　　参见：<a href="http://39.108.3.243/mxb/myler/">http://39.108.3.243/mxb/myler/</a></p>
 
